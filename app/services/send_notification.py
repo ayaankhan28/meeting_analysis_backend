@@ -1,5 +1,5 @@
 from twilio.rest import Client
-from backend.app.config import *
+from app.config import *
 # Twilio credentials (replace with your actual credentials)
 
 # Initialize Twilio client

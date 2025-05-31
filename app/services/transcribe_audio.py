@@ -2,7 +2,7 @@ import os
 import requests
 import httpx
 from deepgram import DeepgramClient, PrerecordedOptions, FileSource
-from backend.app.config import DEEPGRAM_API_KEY
+from app.config import DEEPGRAM_API_KEY
 
 def transcribe_audio(audio_path):
     """Transcribe an audio file using Deepgram."""
