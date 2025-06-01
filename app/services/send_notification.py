@@ -10,4 +10,4 @@ def send_whatsapp_message(message, phone_number):
         to=f"whatsapp:{phone_number}"
     )
 
-send_whatsapp_message("Hello, this is a test message", "+919343282801")
+# send_whatsapp_message("Hello, this is a test message", "+919343282801")
