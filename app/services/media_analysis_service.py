@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Dict, Optional
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from app.models.models import Media, Analysis, AnalysisStatus
+from app.models.models import Media, Analysis, AnalysisStatus, User
 from app.services.storage_service import StorageService
 from app.services.video_to_audio import convert_video_to_audio_async
 from app.services.transcription_service import TranscriptionService
@@ -16,6 +16,7 @@ import tempfile
 import uuid
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from app.services.send_notification import send_whatsapp_message
 
 class MediaAnalysisService:
     def __init__(self, db: AsyncSession, storage_service: StorageService):
@@ -25,6 +26,27 @@ class MediaAnalysisService:
         self.openai_client = AsyncOpenAI(api_key=OPENAI_API_KEY)
         self.executor = ThreadPoolExecutor(max_workers=2)
         
+    async def _send_whatsapp_notification(self, user_id: str, media_title: str, media_id: str) -> None:
+        """Send WhatsApp notification if enabled for the user."""
+        try:
+            # Get user details
+            query = select(User).where(User.id == user_id)
+            result = await self.db.execute(query)
+            user = result.scalar_one_or_none()
+
+            if user and user.notification_active and user.phone_number:
+                message = f"🎥 Your meeting '{media_title}' analysis is complete!\n\n"
+                message += f"View insights here: http://localhost:3000/insights/{media_id}\n\n"
+                message += "Powered by MeetingIQ Pro 🚀"
+                
+                send_whatsapp_message(message, user.phone_number)
+                print(f"WhatsApp notification sent to user {user_id}")
+            else:
+                print(f"WhatsApp notification not enabled for user {user_id}")
+        except Exception as e:
+            print(f"Failed to send WhatsApp notification: {str(e)}")
+            # Don't raise the exception to avoid failing the whole process
+
     async def process_media(self, media_id: str) -> Dict:
         """Process a media file (video or audio) and generate analysis."""
         analysis = None
@@ -61,7 +83,7 @@ class MediaAnalysisService:
                 media_path = os.path.join(temp_dir, f"media_file.{media_extension}")
                 
                 print(f"Downloading media to: {media_path}")
-                await self.storage_service.download_video(media.url, media_path)
+                await self.storage_service.download_video(media.file_path, media_path)
                 
                 # Convert video to audio if needed (run in thread pool to avoid blocking)
                 audio_path = os.path.join(temp_dir, "audio.mp3")
@@ -91,9 +113,21 @@ class MediaAnalysisService:
                 # Update analysis record
                 analysis.status = AnalysisStatus.DONE
                 analysis.meta = analysis_result
+                analysis.transcription = transcription
+                media.title = analysis_result.get('video_title', '')
+                media.description = analysis_result.get('description', '')
+                media.media_thumbnail = analysis_result.get('thumbnail_url', '')
                 await self.db.commit()
                 
+                # Send WhatsApp notification
+                await self._send_whatsapp_notification(
+                    user_id=media.user_id,
+                    media_title=media.title,
+                    media_id=media_id
+                )
+                
                 print(f"Analysis completed successfully for media_id: {media_id}")
+                
                 return analysis_result
                 
         except Exception as e:
@@ -158,7 +192,36 @@ class MediaAnalysisService:
                 video.release()
         
         loop = asyncio.get_event_loop()
+
+        # Generate video thumbnail at 10 seconds
+        try:
+            video_thumb_path = f"temp_video_thumb.jpg"
+            success = await loop.run_in_executor(
+                self.executor,
+                extract_frame,
+                video_path,
+                10.0, # 10 second mark
+                video_thumb_path
+            )
+
+            if success:
+                # Upload video thumbnail
+                thumb_url = await self._upload_frame(video_thumb_path)
+                analysis['thumbnail_url'] = thumb_url
+
+                # Clean up temp file
+                try:
+                    os.remove(video_thumb_path)
+                except OSError:
+                    pass
+            else:
+                analysis['thumbnail_url'] = None
+
+        except Exception as e:
+            print(f"Error extracting video thumbnail: {str(e)}")
+            analysis['thumbnail_url'] = None
         
+        # Generate chapter thumbnails
         for i, chapter in enumerate(analysis.get('chapters', [])):
             try:
                 # Parse timestamp (assuming format "[XX.XXs]")

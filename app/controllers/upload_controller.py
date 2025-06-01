@@ -31,13 +31,17 @@ async def get_presigned_url(file_name: str,file_type: str,user_id: uuid.UUID, db
         file_type=file_type,
         user_id=user_id
         )
+    print("XOxoxoxo 1")
     media_repo = MediaRepository(db)
+    print("XOxoxoxo 2")
     media = await media_repo.create_media(
         user_id=user_id,
         type=file_type,
-        url=result["file_path"],
+        media_url=result["file_url"],
+        file_path=result["file_path"],
         status=UploadStatus.PENDING
     )
+    print("XOxoxoxo 3")
     result["media_id"] = media.id
     return result
 
@@ -56,10 +60,12 @@ async def update_media_status(
 
 
 @router.get("/get-user-media")
-async def get_user_media(user_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+async def get_user_media( user_id: uuid.UUID,recent: Optional[bool] = False, db: AsyncSession = Depends(get_db)):
     media_repo = MediaRepository(db)
     media_list = await media_repo.get_user_media(user_id)
-    
+    if recent:
+        media_list = sorted(media_list, key=lambda x: x.created_at, reverse=True)
+        media_list = media_list[:3]
     formatted_media = []
     for media in media_list:
         # Get the latest analysis status if any analysis exists
@@ -77,19 +83,15 @@ async def get_user_media(user_id: uuid.UUID, db: AsyncSession = Depends(get_db))
             "created_at": media.created_at.isoformat(),
             "upload_status": media.upload_status,
             "analysis_status": analysis_status,
-            "url": media.url
+            "title": media.title,
+            "description": media.description,
+
         })
     
     return formatted_media
 
 
-@router.get("/process-media")
-async def process_media(media_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
-    media_repo = MediaRepository(db)
-    media = await media_repo.get_media(media_id)
-    if not media:
-        raise HTTPException(status_code=404, detail="Media not found")
-    return media
+
 
 class UserSync(BaseModel):
     id: str

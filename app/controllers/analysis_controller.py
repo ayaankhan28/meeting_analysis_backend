@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.services.media_analysis_service import MediaAnalysisService
 from app.services.storage_service import StorageService
-from app.models.models import Analysis, AnalysisStatus
+from app.models.models import Analysis, AnalysisStatus, Media
 from typing import Dict, Optional
 from fastapi import BackgroundTasks
 import uuid
@@ -139,6 +139,9 @@ async def get_media_analysis(
         query = select(Analysis).where(
             Analysis.media_id == media_id
         ).order_by(Analysis.created_at.desc())
+        media_query = select(Media).where(Media.id == media_id)
+        media_result = await db.execute(media_query)
+        media = media_result.scalar_one_or_none()
         result = await db.execute(query)
         analysis = result.scalar_one_or_none()
         
@@ -174,7 +177,9 @@ async def get_media_analysis(
                 "data": {
                     "analysis_id": str(analysis.id),
                     "status": analysis.status,
+                    "media_url": media.media_url,
                     "meta": analysis.meta,
+                    "transcription": analysis.transcription,
                     "created_at": analysis.created_at,
                     "updated_at": analysis.updated_at
                 }

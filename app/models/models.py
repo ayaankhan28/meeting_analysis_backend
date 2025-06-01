@@ -38,6 +38,8 @@ class User(Base):
     auth_provider: Mapped[Optional[str]] = mapped_column(String)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_login: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    phone_number: Mapped[Optional[str]] = mapped_column(String(20))
+    notification_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     # Relationships
     media: Mapped[List["Media"]] = relationship(back_populates="user")
@@ -56,7 +58,8 @@ class Media(Base):
     media_thumbnail: Mapped[Optional[str]] = mapped_column(Text)
     duration: Mapped[Optional[int]] = mapped_column(Integer)
     language: Mapped[Optional[str]] = mapped_column(String(10))
-    url: Mapped[str] = mapped_column(Text, nullable=False)
+    file_path: Mapped[Optional[str]] = mapped_column(Text)
+    media_url: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -74,6 +77,7 @@ class Analysis(Base):
     meta: Mapped[dict] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    transcription: Mapped[Optional[str]] = mapped_column(Text)
 
     # Relationships
     media: Mapped["Media"] = relationship(back_populates="analysis")

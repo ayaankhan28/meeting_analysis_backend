@@ -1,4 +1,3 @@
-
 fastapi
 uvicorn[standard]
 sqlalchemy
@@ -10,5 +9,7 @@ aiohttp
 opencv-python
 pydantic
 python-dotenv
+twilio==8.12.0
+httpx==0.27.0
 
 

@@ -12,7 +12,8 @@ class MediaRepository:
 
     async def create_media(self, 
                          user_id: uuid.UUID,
-                         url: str,
+                         file_path: str,
+                         media_url: str,
                          type: Optional[MediaType] = MediaType.VIDEO,
                          language: Optional[str] = None,
                          duration: Optional[int] = None,
@@ -21,7 +22,8 @@ class MediaRepository:
         media = Media(
             user_id=user_id,
             type=type,
-            url=url,
+            file_path=file_path,
+            media_url=media_url,
             language=language,
             duration=duration,
             upload_status=status
