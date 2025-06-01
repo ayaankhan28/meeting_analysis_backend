@@ -1,0 +1,14 @@
+
+fastapi
+uvicorn[standard]
+sqlalchemy
+asyncpg
+supabase
+openai
+groq
+aiohttp
+opencv-python
+pydantic
+python-dotenv
+
+
