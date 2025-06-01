@@ -1,16 +1,21 @@
 from fastapi import FastAPI
-from app.controllers.upload_controller import router as upload_router
 from fastapi.middleware.cors import CORSMiddleware
+from app.controllers import upload_controller, analysis_controller
 
 app = FastAPI()
+
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["*"],  # Update this with your frontend URL in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(upload_router)
+
+# Include routers
+app.include_router(upload_controller.router)
+app.include_router(analysis_controller.router)
 
 @app.get("/")
 def root():

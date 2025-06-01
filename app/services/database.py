@@ -1,9 +1,6 @@
 import os
-from dotenv import load_dotenv
 from supabase import create_client, Client
 from app.config import SUPABASE_URL, SUPABASE_KEY
-
-# Get Supabase credentials from environment variables
 
 
 if not SUPABASE_URL or not SUPABASE_KEY:

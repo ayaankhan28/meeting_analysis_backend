@@ -83,7 +83,12 @@ class MediaRepository:
 
     async def get_user_media(self, user_id: uuid.UUID) -> List[Media]:
         """Get all media for a specific user"""
-        query = select(Media).where(Media.user_id == user_id).order_by(Media.created_at.desc())
+        query = (
+            select(Media)
+            .options(selectinload(Media.analysis))
+            .where(Media.user_id == user_id)
+            .order_by(Media.created_at.desc())
+        )
         result = await self.session.execute(query)
         return result.scalars().all()
 
