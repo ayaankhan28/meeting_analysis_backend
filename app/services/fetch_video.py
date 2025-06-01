@@ -1,6 +1,6 @@
 from app.services.storage_service import StorageService
 
-async def download_video(storage_service: StorageService, "file_path": str, local_path: str) -> str:
+async def download_video(storage_service: StorageService, file_path: str, local_path: str) -> str:
 
     try:
         downloaded_path = await storage_service.download_video(file_path, local_path)

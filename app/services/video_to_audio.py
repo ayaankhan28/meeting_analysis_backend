@@ -1,5 +1,3 @@
-# video_to_audio.py
-
 import subprocess
 
 def convert_video_to_audio(video_path, audio_path):
@@ -10,5 +8,3 @@ def convert_video_to_audio(video_path, audio_path):
         print(f"Audio saved to {audio_path}")
     except subprocess.CalledProcessError as e:
         print(f"Error converting video to audio: {e}")
-
-# convert_video_to_audio("videoplayback.mp4", "videoplayback.mp3")

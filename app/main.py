@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from app.controllers.video_controller import router as video_router
 from app.controllers.upload_controller import router as upload_router
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -11,7 +10,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(video_router)
 app.include_router(upload_router)
 
 @app.get("/")
