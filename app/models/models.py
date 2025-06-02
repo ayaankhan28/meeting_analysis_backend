@@ -82,3 +82,16 @@ class Analysis(Base):
     # Relationships
     media: Mapped["Media"] = relationship(back_populates="analysis")
 
+class Chat(Base):
+    """Model for chat messages."""
+
+    __tablename__ = 'chat'
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    media_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey('media.id', ondelete='CASCADE'), nullable=False)
+    user_type: Mapped[str] = mapped_column(Text, nullable=False)
+    message: Mapped[Optional[str]] = mapped_column(Text)
+    created: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationships

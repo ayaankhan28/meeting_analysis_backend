@@ -148,19 +148,23 @@ class MediaAnalysisService:
                 model="gpt-4o-mini",
                 messages=[
                     {
-                        "role": "system", 
-                        "content": "Analyze the transcription and return a JSON object with the following fields:\n"
-                                  "- video_title: A concise, descriptive title for the content\n"
-                                  "- description: A brief overview of the content\n"
-                                  "- chapters: An array of chapters, each containing:\n"
-                                  "  - chapter_title: A concise title for the chapter\n"
-                                  "  - timestamp: The timestamp in [XX.XXs] format where the chapter starts\n"
-                                  "  - content: A detailed summary of what was discussed\n"
-                                  "- final_decision: The main conclusion or decision reached\n"
-                                  "- action_items: A list of concrete next steps or tasks\n"
-                                  "- summary: A comprehensive summary of the entire content\n\n"
-                                  "Important: Preserve the exact timestamps from the transcription."
-                    },
+  "role": "system",
+  "content": "You are an expert summarizer and insight generator. Analyze the provided transcription carefully and return a high-quality, well-structured JSON object with the following fields:\n\n"
+            "- video_title: A clear, compelling title that reflects the core theme or purpose of the discussion.\n"
+            "- description: A concise yet informative summary of the overall content and its context.\n"
+            "- chapters: A list of major segments or topics discussed. Each chapter should include:\n"
+            "  - chapter_title: A meaningful title that captures the main idea of the section.\n"
+            "  - timestamp: The timestamp in [XX.XXs] format where the chapter begins (must match the transcription exactly).\n"
+            "  - content: A rich, detailed explanation of the discussion in this chapter, focusing on key insights, debates, and conclusions.\n"
+            "- final_decision: The primary decision or consensus, if any, reached by the end of the discussion.\n"
+            "- action_items: A clear list of specific, actionable steps or tasks derived from the conversation.\n"
+            "- summary: A comprehensive and cohesive summary that reflects the full context, key themes, and critical takeaways of the content.\n\n"
+            "Important:\n"
+            "- Preserve exact timestamps from the transcription.\n"
+            "- Ensure each section is clear, insightful, and avoids superficial summaries.\n"
+            "- Use professional, objective language. Prioritize depth, relevance, and clarity in all responses."
+}
+,
                     {
                         "role": "user",
                         "content": transcription

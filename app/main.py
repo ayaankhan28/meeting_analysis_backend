@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.controllers import upload_controller, analysis_controller, whatsapp
+from app.controllers import upload_controller, analysis_controller, whatsapp, chat
+
 
 
 app = FastAPI()
@@ -18,7 +19,7 @@ app.add_middleware(
 app.include_router(upload_controller.router)
 app.include_router(analysis_controller.router)
 app.include_router(whatsapp.router)
-
+app.include_router(chat.router)
 @app.get("/")
 def root():
     return {"message": "Welcome to FastAPI Video Processing Server"}
