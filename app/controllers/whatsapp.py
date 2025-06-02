@@ -4,7 +4,8 @@ from app.services.send_notification import send_whatsapp_message
 from app.models.models import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
-from sqlalchemy import update
+from sqlalchemy import update, select
+import uuid
 
 router = APIRouter()
 
@@ -47,3 +48,24 @@ async def disconnect_whatsapp(data: WhatsAppDisconnect, db: AsyncSession = Depen
         return {"status": "success", "message": "WhatsApp notifications disabled"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 
+
+    
+
+@router.get("/get-state")
+async def get_whatsapp_state(user_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    try:
+        # Get user from database
+        user = await db.execute(select(User).where(User.id == user_id))
+        user = user.scalar_one_or_none()
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return {
+            "status": "success",
+            "phone_number": user.phone_number,
+            "notification_active": user.notification_active
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
